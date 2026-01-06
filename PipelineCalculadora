@@ -1,42 +1,39 @@
-pipeline
-{
-	agent any
-	
-	stages{
-		stage('Checkout'){
-			steps{
-				checkout scm
-			}
-		}
-		
-		stage('Restore'){
-			steps{
-				sh 'dotnet restore projectCalculadora.sln'
-			}
-		}
-		
-		stage('Build'){
-			steps{
-				sh 'dotnet build projectCalculadora.sln --configuration Release --no-build'
-			}
-		}
-		
-		stage('Test'){
-			steps{
-				sh 'dotnet test calculadoraApp.Tests/calculadoraApp.Tests.csproj --configuration Release --no-build'
-			}
-		}
-		
-		stage('Publish'){
-			steps{
-				sh 'dotnet publish calculadoraApp/calculadoraApp.csproj -c Release -o publish'
-			}
-		}
-	}
-	
-	post{
-		success{
-			archiveArtifacts artifacts: 'publish/**', fingerprint: true
-		}
-	}
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Descarga el código desde el SCM configurado
+                checkout scm 
+            }
+        }
+        stage('Restore') {
+            steps {
+                // 'bat' es el comando correcto para Jenkins en Windows
+                bat 'dotnet restore projectCalculadora.sln'
+            }
+        }
+        stage('Build') {
+            steps {
+                bat 'dotnet build projectCalculadora.sln --configuration Release --no-restore'
+            }
+        }
+        stage('Test') {
+            steps {
+                bat 'dotnet test calculadoraApp.Tests/calculadoraApp.Tests.csproj --configuration Release --no-build'
+            }
+        }
+        stage('Publish') {
+            steps {
+                bat 'dotnet publish calculadoraApp/calculadoraApp.csproj -c Release -o publish'
+            }
+        }
+    }
+    post {
+        success {
+            // Guarda los archivos generados para que puedas descargarlos desde la interfaz de Jenkins
+            archiveArtifacts artifacts: 'publish/**', fingerprint: true
+        }
+    }
 }
